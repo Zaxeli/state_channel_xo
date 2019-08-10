@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Hello world</title>
+   </head>
+   <script src = "/socket.io/socket.io.js"></script>
+   
+   <script>
+      var socket = io();
+      socket.on('message',(data)=>{
+         //document.write(data);
+      })
+      function move(){
+      socket.emit('clientMove',{X: 1, Y: 1})}
+   </script>
+   <body>Hello world
+      <button onclick="move()"></button>
+   </body>
+</html>
