@@ -7,13 +7,20 @@
    
    <script>
       var socket = io();
-      socket.on('message',(data)=>{
+      socket.on('hostMsg',(data)=>{
+         console.log('>'+data)
          //document.write(data);
       })
-      function move(){
-      socket.emit('clientMove',{X: 1, Y: 1})}
+
+      function send(){
+         var msg = document.getElementById("message").value
+         console.log('Client entered : ' + msg)
+         socket.emit('clientMsg',msg);
+      }
    </script>
    <body>Hello world
-      <button onclick="move()"></button>
+      <br/>
+      <button onclick="send()">SEND</button>
+      <input id="message"></input>
    </body>
 </html>

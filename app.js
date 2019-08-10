@@ -6,6 +6,12 @@ app.get('/', function(req,res){
     res.sendfile('index.html')
 });
 
+var stdin = process.openStdin();
+
+stdin.addListener("data",(d)=>{
+    console.log("you entered [\"" + d.toString().trim() +"\"]");
+})
+
 io.on('connection', function(socket){
     console.log('User connected');
 
