@@ -7,6 +7,8 @@ var web3 = new Web3(new Web3.providers.HttpProvider(
     'http://127.0.0.1:8545'
 ));
 
+console.log('PLEASE MAKE SURE THAT YOU HAVE STARTED Ganache-cli IF YOU WANT TO USE IT!!!');
+
 var accounts = [];
 
 main()
@@ -27,5 +29,7 @@ async function main(){
     })
     .then((res)=>{console.log('address is -> ' + res.options.address)})
     .catch(console.log)
+
+    await web3.eth.sign('Hello',accounts[0]).then(console.log).catch(console.log)
 
 }
