@@ -16,6 +16,8 @@ contract Game {
 
     Player host;
     Player challenger;
+    
+    event challengerUpdate(string, address, uint);
 
     constructor(string memory _hostId ) public payable {
 
@@ -33,16 +35,24 @@ contract Game {
         return gethost();
     }
 
-    // Setup game (credentials)
+    // Get  game credentials
 
     function gethost() public view returns (string memory, address, uint){
         return (host.playerId, host.playerAddress, host.playerEscrow);
     }
 
+    function getchallenger() public view returns (string memory, address, uint){
+        return (challenger.playerId, challenger.playerAddress, challenger.playerEscrow);
+    }
+
+    // Set game credentials
+
     function setchallenger(string memory _playerId) public payable returns (string memory, address, uint){
         challenger.playerId = _playerId;
         challenger.playerAddress = msg.sender;
-        challenger.playerEscrow = msg.value;
+        challenger.playerEscrow = challenger.playerEscrow + msg.value;
+        
+        emit challengerUpdate(challenger.playerId, challenger.playerAddress, challenger.playerEscrow);
 
         return (challenger.playerId, challenger.playerAddress, challenger.playerEscrow);
     }
