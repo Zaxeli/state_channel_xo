@@ -253,7 +253,7 @@ module.exports = {
         else return false;
     }
 }
-
+/*
 var board = 
     [['O','',''],
     ['','',''],
@@ -269,4 +269,4 @@ var newBoard =
 var playersMark = 'X';
 
 console.log(module.exports.setSocket('s'));
-console.log(module.exports.socket)
+console.log(module.exports.socket)*/

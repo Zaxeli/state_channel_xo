@@ -33,6 +33,9 @@ var escrowValue = 20;
 var stdin = process.openStdin();
 
 stdin.addListener("data", async (move)=>{
+    // making the raw input to simple string
+    move = move.toString().trim();
+
 
     //await sendSignedMsg(d);
 
@@ -45,7 +48,7 @@ stdin.addListener("data", async (move)=>{
 
         var moveData = moveUtil.newMoveData(board, newBoard);
 
-        var signature = await web3.eth.sign(moveData, clientAcc)
+        var signature = await web3.eth.sign(JSON.stringify(moveData), clientAcc)
         .then((sign)=>{
             return sign;
         })
@@ -59,10 +62,15 @@ stdin.addListener("data", async (move)=>{
             var hostSign = _moveData.moveTakerSign;
             _moveData.moveTakerSign = ''
 
-            if( ( JSON.stringify(moveData) == JSON.stringify(_moveData) ) && ( hostAcc == web3.eth.accounts.recover(_moveData, hostSign) )){
+            if( ( JSON.stringify(moveData) == JSON.stringify(_moveData) ) && ( hostAcc == web3.eth.accounts.recover(JSON.stringify(_moveData), hostSign) )){
                 // if the moveData is not changed, and the sign is authentically by host
                 
                 board = newBoard;
+
+                console.log('BOARD:\n',board);
+                let chance = moveUtil.checkTurn(board);
+                if(chance == 'X') console.log('Host\'s turn');
+                else if(chance == 'O') console.log('Client\'s turn');
 
                 // client Victory?
                 // send emit for clientWin
@@ -75,7 +83,6 @@ stdin.addListener("data", async (move)=>{
 
 
 socket.on('connect', async ()=>{
-    console.log(moveUtil)
     moveUtil.setSocket(socket);
     moveUtil.setWeb3(web3);
 
@@ -96,7 +103,7 @@ socket.on('connect', async ()=>{
 
     // /Handshake
 
-    socket.on('hostMove', (moveData)=>{
+    socket.on('hostMove', async (moveData)=>{
 
         var hostSign = moveData.moveBySign;
         moveData.moveBySign = '';
@@ -108,7 +115,7 @@ socket.on('connect', async ()=>{
         if( JSON.stringify(moveData.oldBoard) == JSON.stringify(board) &&
             moveUtil.checkTurn(board) == hostMark &&
             moveUtil.checkValidMove(moveData.oldBoard, moveData.newBoard, hostMark) == true &&
-            hostAcc == web3.eth.accounts.recover(_moveData, hostSign)){
+            hostAcc == web3.eth.accounts.recover(JSON.stringify(moveData), hostSign)){
             
                 // put their sign back
                 // make my sign and add it
@@ -116,12 +123,19 @@ socket.on('connect', async ()=>{
 
                 moveData.moveBySign = hostSign;
 
-                moveData.moveTakerSign = web3.eth.sign(moveData, clientAcc);
+                moveData.moveTakerSign = await web3.eth.sign(JSON.stringify(moveData), clientAcc)
+                .then((sign)=>{
+                    return sign;
+                });
 
                 socket.emit('hostMoveAck', moveData);
+console.log(moveData)
+                board = moveData.newBoard;
 
-                board = moveTakerSign.newBoard;
-
+                console.log('BOARD:\n',board);
+                let chance = moveUtil.checkTurn(board);
+                if(chance == 'X') console.log('Host\'s turn');
+                else if(chance == 'O') console.log('Client\'s turn');
                 // host Victory?
                 // get hostWin event,
                 // do something
