@@ -3,11 +3,11 @@
 
 var board = 
     [['','',''],
-    ['','','']
+    ['','',''],
     ['','','']];
 
 var address = 'http://127.0.0.1:3000/'
-var moveUtil = require('./util/util.js')
+var moveUtil = require('./Utils/moves.js')
 var socket = require('socket.io-client')(address);
 var Web3 = require('web3');
 
@@ -36,14 +36,20 @@ stdin.addListener("data", async (move)=>{
 
     //await sendSignedMsg(d);
 
-    if( moveUtil.checkTurn(board) == 'O' ){
+    console.log(board);
+
+    if( moveUtil.checkTurn(board) == clientMark ){
         // if it's my turn
 
         var newBoard = moveUtil.translateMoveToGameState(move, board, clientMark);
 
         var moveData = moveUtil.newMoveData(board, newBoard);
 
-        var signature = web3.eth.sign(moveData, clientAcc);
+        var signature = await web3.eth.sign(moveData, clientAcc)
+        .then((sign)=>{
+            return sign;
+        })
+        .catch(console.log);
 
         moveData.moveBySign = signature;
 
@@ -69,7 +75,7 @@ stdin.addListener("data", async (move)=>{
 
 
 socket.on('connect', async ()=>{
-
+    console.log(moveUtil)
     moveUtil.setSocket(socket);
     moveUtil.setWeb3(web3);
 
@@ -82,8 +88,15 @@ socket.on('connect', async ()=>{
         console.log('Host entered: ' + msgData.text);
     });
 
-    socket.on('hostMove', (moveData)=>{
+    
 
+    // Handshake -->
+
+    await handshake();    
+
+    // /Handshake
+
+    socket.on('hostMove', (moveData)=>{
 
         var hostSign = moveData.moveBySign;
         moveData.moveBySign = '';
@@ -119,12 +132,6 @@ socket.on('connect', async ()=>{
             
         }
     });
-
-    // Handshake -->
-
-    await handshake();    
-
-    // /Handshake
 })
 async function handshake(){
     socket.on('contract', async (contractInfo)=>{

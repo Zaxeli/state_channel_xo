@@ -2,10 +2,11 @@
 
 var board = 
     [['','',''],
-    ['','','']
+    ['','',''],
     ['','','']];
 
-var contractData = require('./Contract/contr.js')
+var moveUtil = require('./Utils/moves.js');
+var contractData = require('./Contract/contr.js');
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -33,9 +34,44 @@ app.get('/', function(req,res){
 var _socket = {};
 
 var stdin = process.openStdin();
-stdin.addListener("data", async (d)=>{
+stdin.addListener("data", async (move)=>{
+    // making the raw input to simple string
+    move = move.toString().trim();
 
-    await sendSignedMsg(d);
+    //await sendSignedMsg(d);
+
+    if( moveUtil.checkTurn(board) == hostMark ){
+        // if it's my turn
+        
+        var newBoard = moveUtil.translateMoveToGameState(move, board, hostMark);
+
+        var moveData = moveUtil.newMoveData(board, newBoard);
+
+        var signature = await web3.eth.sign(moveData, hostAcc)
+        .then((sign)=>{
+            return sign;
+        })
+        .catch(console.log);
+
+        moveData.moveBySign = signature;
+
+        _socket.emit('hostMove', moveData);
+
+        _socket.on('hostMoveAck', (_moveData)=>{
+            var clientSign = _moveData.moveTakerSign;
+            _moveData.moveTakerSign = ''
+
+            if( ( JSON.stringify(moveData) == JSON.stringify(_moveData) ) && ( clientAcc == web3.eth.accounts.recover(_moveData, clientSign) )){
+                // if the moveData is not changed, and the sign is authentically by host
+                
+                board = newBoard;
+
+                // host Victory?
+                // send emit for hostWin
+                // redeem reward from contract
+            }
+        });
+    }
     
 
 });
@@ -69,6 +105,44 @@ io.on('connection', async (socket)=>{
             return;
         }
         console.log('Client entered : ' + msgData.text)
+    });
+
+    socket.on('clientMove', (moveData)=>{
+
+
+        var clientSign = moveData.moveBySign;
+        moveData.moveBySign = '';
+
+        // is the hostMove's oldBoard same as my board? 
+        // and it was their turn to move?
+        // and the move made is valid?
+        // and hostMove's sign is authentic?
+        if( JSON.stringify(moveData.oldBoard) == JSON.stringify(board) &&
+            moveUtil.checkTurn(board) == clientMark &&
+            moveUtil.checkValidMove(moveData.oldBoard, moveData.newBoard, clientMark) == true &&
+            clientAcc == web3.eth.accounts.recover(_moveData, clientSign)){
+            
+                // put their sign back
+                // make my sign and add it
+                // send emit for hostMoveAck
+
+                moveData.moveBySign = clientSign;
+
+                moveData.moveTakerSign = web3.eth.sign(moveData, hostAcc);
+
+                socket.emit('hostMoveAck', moveData);
+
+                board = moveTakerSign.newBoard;
+
+                // client Victory?
+                // get hostWin event,
+                // do something
+
+
+               
+
+            
+        }
     });
 
     socket.on('disconnect', ()=>{

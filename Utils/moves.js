@@ -32,6 +32,8 @@ module.exports = {
          *  'O' is challenger
          */
         
+        var newGameState = JSON.parse(JSON.stringify(gameState));
+
         move = {
             x: parseInt(move[0]),
             y: parseInt(move[1])
@@ -43,10 +45,10 @@ module.exports = {
         }
 
         else if(gameState[move.x][move.y] == ''){
-            gameState[move.x][move.y] = playersMark;
+            newGameState[move.x][move.y] = playersMark;
         }
 
-        return gameState;
+        return newGameState;
     },
 
     newMoveData : function(oldBoard, newBoard, moveBySign = '', moveTakerSign = ''){
@@ -266,4 +268,5 @@ var newBoard =
 
 var playersMark = 'X';
 
-console.log(module.exports.checkTurn(newBoard));
+console.log(module.exports.setSocket('s'));
+console.log(module.exports.socket)
