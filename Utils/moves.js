@@ -49,6 +49,17 @@ module.exports = {
         return gameState;
     },
 
+    newMoveData : function(oldBoard, newBoard, moveBySign = '', moveTakerSign = ''){
+        var moveData = {
+            oldBoard : oldBoard,
+            newBoard : newBoard,
+            moveBySign : moveBySign,
+            moveTakerSign : moveTakerSign
+        }
+
+        return moveData;
+    },
+
     checkValidMove : function(currentState, newGameState, playersMark){
         /**
          * check if the move is valid or not
@@ -137,7 +148,7 @@ module.exports = {
             throw new Error('web3 moodule is not defined, please set it before its use by using setWeb3() function in this module!');
         }
         
-        this.socket.on('moveMade', (_moveData)=>{
+        this.socket.on('moveMade', async (_moveData)=>{
 
             let okay = true;
 
@@ -165,9 +176,82 @@ module.exports = {
                 throw new Error('Something amiss found in the move while confirming!');
             }
         });
+    },
+
+    checkVictory : function(board){
+        
+        var victory = false;
+        var victor;
+
+        //horizontals
+        for(let i=0; i<3; i++){
+            if(board[i][0] == board[i][1] &&
+                board[i][0] == board[i][2] &&
+                board[i][0] != ''){
+                    
+                    victory = true;
+                    victor = board[i][0];
+
+            }
+        }
+
+        //verticals
+        for(let i=0; i<3; i++){
+            if(board[0][i] == board[1][i] &&
+                board[0][i] == board[2][i] &&
+                board[0][i] != ''){
+                    
+                    victory = true;
+                    victor = board[0][i];
+                    
+            }
+        }
+
+        //diagonals
+        if(board[0][0] == board[1][1] &&
+            board[0][0] == board[2][2] &&
+            board[0][0] != ''){
+                victory = true;
+                victor = board[0][0]
+        }
+        if(board[0][2] == board[1][1] &&
+            board[0][2] == board[2][0] &&
+            board[0][2] != ''){
+                victory = true;
+                victor = board[0][2]
+        }
+
+        return [victory,victor]      
+
+    },
+
+    checkTurn : function(board){
+        // Tells whose turn it is
+        // board is 3x3 array with elements init to  empty string - ''
+        
+        var X = 0;
+        var O = 0;
+        
+        
+        if(this.checkVictory(board)[0]) return true;
+
+        for(let i=0;i<3;i++){
+            for(let j=0;j<3;j++){
+                if(board[i][j] == 'X'){
+                    X++;
+                }
+                else if(board[i][j] == 'O'){
+                    O++;
+                }
+            }
+        }
+
+        if( X == O ) return 'X';
+        else if( X == O+1 ) return 'O';
+        else return false;
     }
 }
-/*
+
 var board = 
     [['O','',''],
     ['','',''],
@@ -176,11 +260,10 @@ var board =
 var move = '01';
 
 var newBoard = 
-    [['O','',''],
-    ['','X',''],
-    ['','','']];
+    [['O','X','X'],
+    ['O','X','O'],
+    ['O','X','']];
 
 var playersMark = 'X';
 
-console.log(module.exports.setSocket({a:1}),module.exports.socket);
-*/
+console.log(module.exports.checkTurn(newBoard));

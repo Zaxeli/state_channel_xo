@@ -1,5 +1,10 @@
 'use strict'
 
+var board = 
+    [['','',''],
+    ['','','']
+    ['','','']];
+
 var contractData = require('./Contract/contr.js')
 var app = require('express')();
 var http = require('http').Server(app);
@@ -17,6 +22,8 @@ var hostAcc = '';
 var clientAcc = '';
 var contractAddress = '';
 var contractInstance = {};
+var hostMark = 'X';
+var clientMark = 'O';
 
 
 app.get('/', function(req,res){
