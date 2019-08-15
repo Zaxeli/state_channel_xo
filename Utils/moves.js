@@ -184,6 +184,15 @@ module.exports = {
         
         var victory = false;
         var victor;
+        var lineOfVictory;
+
+        /**
+         * Line of Victory:
+         * 0,1,2 -> Horizontals - top to bottom
+         * 3,4,5 -> Verticals - left to right
+         * 6 -> Diagonal - top-left to bottom-right
+         * 7 -> Diagonal - top-right to bottom-left
+         */
 
         //horizontals
         for(let i=0; i<3; i++){
@@ -193,6 +202,7 @@ module.exports = {
                     
                     victory = true;
                     victor = board[i][0];
+                    lineOfVictory = i;
 
             }
         }
@@ -205,6 +215,7 @@ module.exports = {
                     
                     victory = true;
                     victor = board[0][i];
+                    lineOfVictory = 3 + i;
                     
             }
         }
@@ -214,16 +225,20 @@ module.exports = {
             board[0][0] == board[2][2] &&
             board[0][0] != ''){
                 victory = true;
-                victor = board[0][0]
+                victor = board[0][0];
+                lineOfVictory = 6;
         }
         if(board[0][2] == board[1][1] &&
             board[0][2] == board[2][0] &&
             board[0][2] != ''){
                 victory = true;
                 victor = board[0][2]
+                lineOfVictory = 7;
         }
 
-        return [victory,victor]      
+        
+
+        return {victory : victory, victor : victor}   
 
     },
 
@@ -234,8 +249,8 @@ module.exports = {
         var X = 0;
         var O = 0;
         
-        
-        if(this.checkVictory(board)[0]) return true;
+        var win = this.checkVictory(board)
+        if(win['victory']) return win;
 
         for(let i=0;i<3;i++){
             for(let j=0;j<3;j++){

@@ -33,6 +33,8 @@ app.get('/', function(req,res){
 
 var _socket = {};
 
+var moveData = {};
+
 var stdin = process.openStdin();
 stdin.addListener("data", async (move)=>{
     // making the raw input to simple string
@@ -45,7 +47,7 @@ stdin.addListener("data", async (move)=>{
         
         var newBoard = moveUtil.translateMoveToGameState(move, board, hostMark);
 
-        var moveData = moveUtil.newMoveData(board, newBoard);
+        moveData = moveUtil.newMoveData(board, newBoard);
 
         var signature = await web3.eth.sign(JSON.stringify(moveData), hostAcc)
         .then((sign)=>{
@@ -57,15 +59,45 @@ stdin.addListener("data", async (move)=>{
 
         _socket.emit('hostMove', moveData);
 
-        _socket.on('hostMoveAck', async (_moveData)=>{
+        /*_socket.on('hostMoveAck', async (_moveData)=>{
+            console.log('hma');
+            var clientSign = _moveData.moveTakerSign;
+            console.log('clientSign is: ',clientSign);
+            _moveData.moveTakerSign = '';
 
+            if(JSON.stringify(moveData) == JSON.stringify(_moveData)){
+                console.log('moveData is same');
+
+                let x = await web3.eth.sign(JSON.stringify(_moveData), clientAcc).then((s)=>{return s;}).catch(console.log);
+                console.log('x is: ',x);
+                console.log('clientSign is: ',clientSign);
+                
+                if( x == clientSign ){
+                    console.log('Sign is ok!');
+
+                    board = newBoard;
+
+                    console.log('BOARD:\n',board);
+                    let chance = moveUtil.checkTurn(board);
+                    if(chance == 'X') console.log('Host\'s turn');
+                    else if(chance == 'O') console.log('Client\'s turn');
+
+                }
+            }
+
+
+            /*console.log('OOO')
             var clientSign = _moveData.moveTakerSign;
             _moveData.moveTakerSign = ''
-
-
-            let x = await web3.eth.accounts.recover(JSON.stringify(_moveData), clientSign)
+            let x;
+            try{
+            x = await web3.eth.accounts.recover(JSON.stringify(_moveData), clientSign)
+            }catch(e){console.log(e)}
+            console.log(JSON.stringify(_moveData))
+            console.log(clientSign)
             console.log(x == clientAcc)
-            if( ( JSON.stringify(moveData) == JSON.stringify(_moveData) ) && ( clientAcc ==  x)){
+            console.log(x)
+            if( ( JSON.stringify(moveData) == JSON.stringify(_moveData) ) && ( clientAcc ==  x )){
                 // if the moveData is not changed, and the sign is authentically by host
                 
                 board = newBoard;
@@ -74,12 +106,12 @@ stdin.addListener("data", async (move)=>{
                 let chance = moveUtil.checkTurn(board);
                 if(chance == 'X') console.log('Host\'s turn');
                 else if(chance == 'O') console.log('Client\'s turn');
-
+                
                 // host Victory?
                 // send emit for hostWin
                 // redeem reward from contract
             }
-        });
+        });*/
     }
     
 
@@ -151,6 +183,8 @@ console.log(moveData)
                 let chance = moveUtil.checkTurn(board);
                 if(chance == 'X') console.log('Host\'s turn');
                 else if(chance == 'O') console.log('Client\'s turn');
+                else if(chance == false) throw new Error('Something is wrong on the board!');
+                else if(chance['victory']) console.log(chance['victor'],' WON!');
 
                 // client Victory?
                 // get hostWin event,
@@ -160,6 +194,29 @@ console.log(moveData)
                
 
             
+        }
+    });
+
+    _socket.on('hostMoveAck', async (_moveData)=>{
+
+        var clientSign = _moveData.moveTakerSign;
+        _moveData.moveTakerSign = ''
+        
+        if( ( JSON.stringify(moveData) == JSON.stringify(_moveData) ) && ( clientAcc ==  await web3.eth.accounts.recover(JSON.stringify(_moveData), clientSign) )){
+            // if the moveData is not changed, and the sign is authentically by host
+            
+            board = _moveData.newBoard;
+
+            console.log('BOARD:\n',board);
+            let chance = moveUtil.checkTurn(board);
+            if(chance == 'X') console.log('Host\'s turn');
+            else if(chance == 'O') console.log('Client\'s turn');
+            else if(chance == false) throw new Error('Something is wrong on the board!');
+            else if(chance['victory']) console.log(chance['victor'],' WON!');
+
+            // host Victory?
+            // send emit for hostWin
+            // redeem reward from contract
         }
     });
 
