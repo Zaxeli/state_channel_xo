@@ -1,5 +1,8 @@
 'use strict'
+
+
 var address = 'http://127.0.0.1:3000/'
+var moveUtil = require('./util/util.js')
 var socket = require('socket.io-client')(address);
 var Web3 = require('web3');
 
@@ -24,22 +27,7 @@ var stdin = process.openStdin();
 
 stdin.addListener("data", async (d)=>{
 
-    let text = d.toString().trim();
-
-    let signature = await web3.eth.sign(text, clientAcc)
-        .then((sign)=>{
-            return sign;
-        })
-        .catch(console.log);
-
-    let msgData = {
-        text : text,
-        signature : signature
-    };
-
-    console.log("Client entered: " + text);
-    console.log('Sign : ' + signature);
-    socket.emit('clientMsg', msgData);
+    await sendSignedMsg(d);
 });
 
 
@@ -118,3 +106,49 @@ async function setChallenge(clientId, escrowValue){
         
 }
 
+async function sendSignedMsg(rawMsg){
+    /**
+     * Get some message, sign it and bundle it up together for sending
+     * Returns: ready to send 'Object' message with text and sign - 'signedMsg'
+     */
+    let text = rawMsg.toString().trim()
+
+    let signature = await web3.eth.sign(text, clientAcc)
+        .then((sign)=>{
+            return sign;
+        })
+        .catch(console.log)
+
+    let msgData = {
+        text: text,
+        signature: signature
+    }
+
+    socket.emit('clientMsg', msgData);
+    console.log('Client entered : ' + text);
+    console.log('Sign : ' + signature);
+}
+
+// -- Move to new file - common for both players
+
+function translateMoveToGameState(){
+    /**
+     * take the raw console input and translate it, if possible, to a game state - the new one, for proposing to opponent
+     */
+    return newGameState;
+}
+
+function checkValidMove(currentState){
+    /**
+     * check if the move is valid or not
+     */
+}
+
+function proposeMove(){
+    /**
+     * propose the move to opponent and await confirmation
+     * if confirmed, update
+     * if not confirmed, maybe greifing
+     */
+
+}
