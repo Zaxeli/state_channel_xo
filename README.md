@@ -8,7 +8,7 @@ Instructions:
 2. Install ganache-cli if not already installed.
 3. Clone / copy  this repository to your device.
 
-(Starting)
+(Starting)  
 4. Start ganache-cli
 5. Navigate to repository on your device.
 6. Run h.sh in a new terminal
@@ -16,7 +16,7 @@ Instructions:
 7. Run command in a new terminal: node client.js
   Note: This is player 2. The mark for this player is 'O'.
 
-(Playing)
+(Playing)  
 Controls:
 The game is basically on a 3x3 array, with each spot denoting a position on a tic tac toe grid.  
   y--->   
