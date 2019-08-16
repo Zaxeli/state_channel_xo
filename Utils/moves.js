@@ -38,7 +38,7 @@ module.exports = {
             x: parseInt(move[0]),
             y: parseInt(move[1])
         };
-
+console.log(move)
         if(gameState[move.x][move.y] != ''){
             // invalid move
             throw new Error('Tried to make an invalid move! Position not empty!');

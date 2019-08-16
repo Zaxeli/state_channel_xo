@@ -18,6 +18,12 @@ var web3 = new Web3(new Web3.providers.WebsocketProvider(
 
 console.log('PLEASE MAKE SURE THAT YOU HAVE STARTED Ganache-cli IF YOU WANT TO USE IT!!!');
 
+const hostNonce = (Math.floor(Math.random() * 1e16)).toString();
+const hostNonceHash = web3.eth.accounts.hashMessage(hostNonce);
+//console.log(hostNonce,'!!!\n',hostNonceHash);
+
+var clientNonce = '';
+
 var accounts = [];
 var hostAcc = ''; 
 var clientAcc = '';
@@ -59,59 +65,7 @@ stdin.addListener("data", async (move)=>{
 
         _socket.emit('hostMove', moveData);
 
-        /*_socket.on('hostMoveAck', async (_moveData)=>{
-            console.log('hma');
-            var clientSign = _moveData.moveTakerSign;
-            console.log('clientSign is: ',clientSign);
-            _moveData.moveTakerSign = '';
-
-            if(JSON.stringify(moveData) == JSON.stringify(_moveData)){
-                console.log('moveData is same');
-
-                let x = await web3.eth.sign(JSON.stringify(_moveData), clientAcc).then((s)=>{return s;}).catch(console.log);
-                console.log('x is: ',x);
-                console.log('clientSign is: ',clientSign);
-                
-                if( x == clientSign ){
-                    console.log('Sign is ok!');
-
-                    board = newBoard;
-
-                    console.log('BOARD:\n',board);
-                    let chance = moveUtil.checkTurn(board);
-                    if(chance == 'X') console.log('Host\'s turn');
-                    else if(chance == 'O') console.log('Client\'s turn');
-
-                }
-            }
-
-
-            /*console.log('OOO')
-            var clientSign = _moveData.moveTakerSign;
-            _moveData.moveTakerSign = ''
-            let x;
-            try{
-            x = await web3.eth.accounts.recover(JSON.stringify(_moveData), clientSign)
-            }catch(e){console.log(e)}
-            console.log(JSON.stringify(_moveData))
-            console.log(clientSign)
-            console.log(x == clientAcc)
-            console.log(x)
-            if( ( JSON.stringify(moveData) == JSON.stringify(_moveData) ) && ( clientAcc ==  x )){
-                // if the moveData is not changed, and the sign is authentically by host
-                
-                board = newBoard;
-
-                console.log('BOARD:\n',board);
-                let chance = moveUtil.checkTurn(board);
-                if(chance == 'X') console.log('Host\'s turn');
-                else if(chance == 'O') console.log('Client\'s turn');
-                
-                // host Victory?
-                // send emit for hostWin
-                // redeem reward from contract
-            }
-        });*/
+        
     }
     
 
@@ -212,13 +166,32 @@ console.log(moveData)
             if(chance == 'X') console.log('Host\'s turn');
             else if(chance == 'O') console.log('Client\'s turn');
             else if(chance == false) throw new Error('Something is wrong on the board!');
-            else if(chance['victory']) console.log(chance['victor'],' WON!');
-
+            else if(chance['victory']){
+                console.log(chance['victor'],' WON!');
+                socket.emit('hostWin','host wins!')
+            } 
             // host Victory?
             // send emit for hostWin
             // redeem reward from contract
         }
     });
+
+    socket.on('clientWin', (d)=>{
+        console.log(d);
+        socket.emit('clientWinAck', hostNonce);
+    });
+
+    socket.on('hostWinAck', async (clientNonce)=>{
+
+        await contractInstance.methods.redeem(clientNonce)
+        .send({from: hostAcc, gas: 1500000, gasPrice: '300' })
+        .then(async (s)=>{
+                console.log('Value redeemed!')
+            }
+        )
+        .catch(console.log);
+
+    })
 
     socket.on('disconnect', ()=>{
         console.log( address + ':' + port + ' has disconnected!');
@@ -297,7 +270,7 @@ async function deployContract(escrowValue){
     }*/
 
     contractInstance = new web3.eth.Contract(contractData.abi);
-    var contractAdd = await contractInstance.deploy({data: contractData.bytecode.object, arguments: ['abc']})
+    var contractAdd = await contractInstance.deploy({data: contractData.bytecode.object, arguments: ['abc', hostNonce]})
     .send({
         from: accounts[0],
         gas: 1500000,

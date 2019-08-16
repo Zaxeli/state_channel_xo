@@ -26,6 +26,11 @@ var contractInstance = {};
 var hostMark = 'X';
 var clientMark = 'O';
 
+const clientNonce = (Math.floor(Math.random() * 1e16)).toString();
+const clientNonceHash = web3.eth.accounts.hashMessage(clientNonce);
+//console.log(clientNonce,'!!!\n',clientNonceHash);
+
+var hostNonce = '';
 
 var clientId = 'Challenger';
 var escrowValue = 20;
@@ -135,6 +140,11 @@ console.log(moveData)
         }
     });
 
+    socket.on('hostWin', (d)=>{
+        console.log(d);
+        socket.emit('hostWinAck', clientNonce);
+    });
+
     socket.on('clientMoveAck', (_moveData)=>{
         var hostSign = _moveData.moveTakerSign;
         _moveData.moveTakerSign = ''
@@ -152,7 +162,7 @@ console.log(moveData)
             else if(chance['victory']){
                 console.log(chance['victor'],' WON!');
                 if(chance[victor] == clientMark){
-                        
+                        socket.emit('clientWin','client wins!');
                 }
             } 
 
@@ -160,6 +170,18 @@ console.log(moveData)
             // send emit for clientWin
             // redeem reward from contract
         }
+    });
+
+    socket.on('clientWinAck', async (hostNonce)=>{
+
+        await contractInstance.methods.redeem(hostNonce)
+        .send({from: clientAcc, gas: 1500000, gasPrice: '300' })
+        .then(async (s)=>{
+                console.log('Value redeemed!')
+            }
+        )
+        .catch(console.log);
+
     });
 
 })
@@ -210,8 +232,8 @@ async function setHostAcc(){
 
 async function setChallenge(clientId, escrowValue){
 
-    await contractInstance.methods.setchallenger(clientId)
-    .send({from: clientAcc, value: escrowValue})
+    await contractInstance.methods.setchallenger(clientId, clientNonce)
+    .send({from: clientAcc, value: escrowValue, gas: 1500000, gasPrice: '300' })
     .then(async (s)=>{
         await socket.emit('challengeSet', 'Game contract has been updated with my challenge!');
         //console.log('challenge set',s)
