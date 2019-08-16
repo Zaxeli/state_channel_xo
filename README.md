@@ -18,11 +18,11 @@ Instructions:
 
 (Playing)
 Controls:
-The game is basically on a 3x3 array, with each spot denoting a position on a tic tac toe grid
-  y--->
- x [['','',''],
- | ['','',''],
- V ['','','']]
+The game is basically on a 3x3 array, with each spot denoting a position on a tic tac toe grid.  
+  y--->   
+ x [['','',''],   
+ | ['','',''],  
+ V ['','','']]  
  
 To make a move, enter the coordinates of the positon, e.g. enter '00' to place mark at (0,0).
 
