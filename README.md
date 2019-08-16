@@ -29,3 +29,5 @@ To make a move, enter the coordinates of the positon, e.g. enter '00' to place m
 8. The player 1 must make the first move.
 9. Next, player 2 ... and so on.
 9. When someone wins, the funds are automatically transferred.
+
+Note: In current implementation, the initial escrow funds are hardcoded. Player1 : 10, Player2 : 20
