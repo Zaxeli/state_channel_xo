@@ -9,12 +9,12 @@ Instructions:
 3. Clone / copy  this repository to your device.
 
 (Starting)  
-4. Start ganache-cli
-5. Navigate to repository on your device.
-6. Run h.sh in a new terminal
+4. Start ganache-cli  
+5. Navigate to repository on your device.  
+6. Run node host.js in a new terminal  
   Note: This is the first player to move once the game has been setup (player 1). The mark for this player is 'X'.
-7. Run command in a new terminal: node client.js
-  Note: This is player 2. The mark for this player is 'O'.
+7. Run command in a new terminal: node client.js  
+  Note: This is player 2. The mark for this player is 'O'.  
 
 (Playing)  
 Controls:
