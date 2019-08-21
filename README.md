@@ -1,6 +1,8 @@
 # state_channel_xo
 Tic-Tac-Toe game over a state channel for Ethereum
 
+Note: Many features in the current implementation have been hardcoded in, and also, the griefing scenario has not been tackled. So, griefing *can* be performed in the current implementiation.
+
 Instructions:
 
 (Prep)
