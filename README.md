@@ -78,4 +78,3 @@ To make a move, enter the coordinates of the positon, e.g. enter '00' to place m
 3. When someone wins, the funds are automatically transferred, i.e. no special instructions are required to redeem funds. 
 
 Note: In current implementation, the initial escrow funds are hardcoded. Player1 : 10, Player2 : 20
-asd
