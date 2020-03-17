@@ -5,15 +5,15 @@ Tic-Tac-Toe game over a state channel on Ethereum.
 ## Caveats:
 ---
 
-1. In the current implementation, may things have been hardcoded in.
-2. Griefing (players not cooperating, e.g. delaying respons to deny victory) is not tackled yet.
+1. In the current implementation, many things have been hardcoded in.
+2. Griefing (players not cooperating, e.g. delaying respons to deny victory) and draws are not addressed yet.
 3. The current implementation serves as a proof-of-concept more than anything else.
 4. The UI is through the terminal window and can be a bit unwieldy.
 5. Live Ethereum blockchain network is not used, instead ganache-cli (Ethereum RPC cient) is used.
 
 ## Design
 ---
-\
+
 The challenger is implemented in client.js and is called 'client' in the code.
 
 
@@ -36,6 +36,8 @@ The move data and the corresponding acknowledgement can be logically represented
 
 ![move data](./res/movedata.jpg)
 
+### Victory / End:
+
 When the game reaches its conclusion, there wil either be a draw or a victory. In either case, each player can present the final gamestate and the smart contract will release funds accordingly. 
 
 In a victory, an additional confirmation is to be obtained from the other player. The protocol for a victory is as such:
@@ -45,6 +47,18 @@ Note: Draw scenario is not implemented in current version, only victories.
 *Player 1 and Player 2 may either be Host or Challenger.*
 
 ![victory protocol](./res/victory.jpg)
+
+## Escrow Redemption:
+
+At the beginning of the game, both players submit the hash digest of their personal nonces [```hash(playerNonce)```]. When a player wins, the opponent should then hand over their nonce to the winner via the playerWinAck message who can then present this to the smart contract in order to redeem the escrow value. Therefore, the extra confirmation for victory is required in order to exchange the nonce from the loser to the winner.
+
+## Dispute settlement:
+
+*(This section is currently unimplemented and requires further development.)*
+
+The general idea is that if there is a dispute, a player may ask the contract to release the funds to the player unless the other player responds by advancing the game.
+
+In the current implementation, it is assumed that no disputes occur and both players play in good faith (optimistic scenario) and all games end in a victory for someone.
 
 
 ## Instructions on how to play (or run):
