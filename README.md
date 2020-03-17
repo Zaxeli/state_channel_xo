@@ -1,4 +1,4 @@
-# # State Channel Tic-tac-toe
+# State Channel Tic-tac-toe
 ---
 Tic-Tac-Toe game over a state channel on Ethereum.
 
