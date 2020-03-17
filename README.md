@@ -40,7 +40,7 @@ The move data and the corresponding acknowledgement can be logically represented
 
 When the game reaches its conclusion, there wil either be a draw or a victory. In either case, each player can present the final gamestate and the smart contract will release funds accordingly. 
 
-In a victory, an additional confirmation is to be obtained from the other player. The protocol for a victory is as such:
+In a victory, an additional confirmation is to be obtained from the other player. The protocol for a victory is as shown below.
 
 Note: Draw scenario is not implemented in current version, only victories.
 
